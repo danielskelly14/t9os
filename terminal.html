@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Fullscreen Terminal Top Input</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    background: black;
+    font-family: monospace;
+    color: #02f50f;
+  }
+
+  .terminal {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
+  .output {
+    flex: 1;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    margin-bottom: 10px;
+  }
+
+  .input-line {
+    display: flex;
+    align-items: center;
+  }
+
+  .prompt {
+    margin-right: 5px;
+  }
+
+  #commandBox {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #02f50f;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  #commandBox::placeholder {
+    color: #02f50faa;
+  }
+</style>
+</head>
+<body>
+<div class="terminal">
+  <div class="output" id="output">Welcome! Type "help" for commands.</div>
+  
+  <div class="input-line">
+    <span class="prompt">user/$></span>
+    <input type="text" id="commandBox" placeholder="Type command...">
+  </div>
+</div>
+
+<script>
+const output = document.getElementById('output');
+const input = document.getElementById('commandBox');
+
+// Commands object
+const commands = { 
+  help: 'Available commands: google, !browser, !gms, !apps, !marks, version',
+  google: 'Opening Google...',
+  version: 'version 2.18',
+  '!browser': 'Opening browser page...',
+  '!gms': 'Opening GamesOS...',
+  '!apps': 'Opening AppOS...',
+  '!marks': 'Opening Marks page...'
+};
+
+// Optional redirects
+const redirects = {
+  google: 'https://www.google.com',
+  devbytes: 'https://www.devbytes.ai',
+  '!browser': 'uh7gbram.html',
+  '!gms': 'gamesos.html',
+  '!apps': 'appos.html',
+  '!marks': 'java.html',
+};
+
+input.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    const cmd = input.value.trim().toLowerCase();
+    input.value = '';
+
+    // Show the command in output
+    output.textContent += `> ${cmd}\n`;
+
+    if (commands[cmd]) {
+      output.textContent += commands[cmd] + '\n';
+      if (redirects[cmd]) window.location.href = redirects[cmd];
+    } else {
+      output.textContent += 'Invalid command!\n';
+    }
+
+    // Scroll to bottom
+    output.scrollTop = output.scrollHeight;
+  }
+});
+</script>
+
+
+
+</body>
+</html>
