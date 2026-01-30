@@ -560,6 +560,26 @@ border: 1px solid rgba(255, 255, 255, 0.15);
 
 }
 
+/* Draggable popup styles */
+.draggable-popup {
+  cursor: default;
+}
+.draggable-popup .popup-header {
+  cursor: grab;
+  user-select: none;
+  padding: 10px;
+  border-radius: 20px 20px 0 0;
+}
+.draggable-popup .popup-header:active {
+  cursor: grabbing;
+}
+.draggable-popup.dragging {
+  opacity: 0.9;
+}
+.draggable-popup.dragging iframe {
+  pointer-events: none;
+}
+
   
 </style>
 </head>
@@ -1849,6 +1869,123 @@ if (selectedBackground) {
   }
 </style>
 <p style="color:#acacac; position: fixed; bottom: -3px; left: 10px; opacity: 0.6;">Version 2.5</p>
+
+<script>
+// Draggable popup functionality
+function makeDraggable(popup) {
+  if (!popup) return;
+  
+  popup.classList.add('draggable-popup');
+  
+  // Create or find the header area (first 40px is draggable)
+  let isDragging = false;
+  let startX, startY, initialX, initialY;
+
+  // Remove inset positioning and set explicit position
+  function initPosition() {
+    if (popup.style.display !== 'none' && popup.style.display !== '') {
+      const rect = popup.getBoundingClientRect();
+      if (!popup.dataset.positioned) {
+        popup.style.inset = 'auto';
+        popup.style.margin = '0';
+        popup.style.left = rect.left + 'px';
+        popup.style.top = rect.top + 'px';
+        popup.dataset.positioned = 'true';
+      }
+    }
+  }
+
+  popup.addEventListener('mousedown', function(e) {
+    // Only drag from the top 40px of the popup (header area)
+    const rect = popup.getBoundingClientRect();
+    const clickY = e.clientY - rect.top;
+    
+    if (clickY > 40) return; // Only drag from header
+    if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.tagName === 'INPUT') return;
+    
+    initPosition();
+    
+    isDragging = true;
+    popup.classList.add('dragging');
+    
+    startX = e.clientX;
+    startY = e.clientY;
+    initialX = popup.offsetLeft;
+    initialY = popup.offsetTop;
+    
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', function(e) {
+    if (!isDragging) return;
+    
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    
+    popup.style.left = (initialX + dx) + 'px';
+    popup.style.top = (initialY + dy) + 'px';
+  });
+
+  document.addEventListener('mouseup', function() {
+    if (isDragging) {
+      isDragging = false;
+      popup.classList.remove('dragging');
+    }
+  });
+
+  // Touch support for mobile
+  popup.addEventListener('touchstart', function(e) {
+    const rect = popup.getBoundingClientRect();
+    const touch = e.touches[0];
+    const clickY = touch.clientY - rect.top;
+    
+    if (clickY > 40) return;
+    if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.tagName === 'INPUT') return;
+    
+    initPosition();
+    
+    isDragging = true;
+    popup.classList.add('dragging');
+    
+    startX = touch.clientX;
+    startY = touch.clientY;
+    initialX = popup.offsetLeft;
+    initialY = popup.offsetTop;
+  });
+
+  document.addEventListener('touchmove', function(e) {
+    if (!isDragging) return;
+    
+    const touch = e.touches[0];
+    const dx = touch.clientX - startX;
+    const dy = touch.clientY - startY;
+    
+    popup.style.left = (initialX + dx) + 'px';
+    popup.style.top = (initialY + dy) + 'px';
+  });
+
+  document.addEventListener('touchend', function() {
+    if (isDragging) {
+      isDragging = false;
+      popup.classList.remove('dragging');
+    }
+  });
+}
+
+// Apply draggable to all popups
+const popupIds = [
+  'hiddenDiv', 'aiDiv', 'terminalDiv', 't9Div', 'settingsDiv', 
+  'appsDiv', 'updateDiv', 'widgetDiv', 'collabDiv', 'soundDiv',
+  'hacksDiv', 'emulatorDiv', 'searchDiv', 'adminDiv', 'leaderboardDiv', 'ChatDiv'
+];
+
+popupIds.forEach(id => {
+  const popup = document.getElementById(id);
+  if (popup) {
+    makeDraggable(popup);
+  }
+});
+</script>
 
 </body>
 
